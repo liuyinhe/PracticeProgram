@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--
+ namespace 命名空间，作用就是对sql进行分类化管理,理解为sql隔离
+ 注意：使用mapper代理方法开发，namespace有特殊重要的作用
+ -->
+<mapper namespace="com.lyh.dao.Mapper">
+
+    <!-- 开启本mapper的namespace下的二级缓存
+     type：指定cache接口的实现类的类型，mybatis默认使用PerpetualCache
+     要和ehcache整合，需要配置type为ehcache实现cache接口的类型
+     <cache />
+     -->
+    <cache type="org.mybatis.caches.ehcache.EhcacheCache"/>
+    <!-- 延迟加载的resultMap -->
+    <resultMap type="com.lyh.dto.Orders" id="OrdersUserLazyLoadingResultMap">
+        <!--对订单信息进行映射配置  -->
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="number" property="number"/>
+        <result column="createtime" property="createtime"/>
+        <result column="note" property="note"/>
+        <!-- 实现对用户信息进行延迟加载
+        select：指定延迟加载需要执行的statement的id（是根据user_id查询用户信息的statement）
+        要使用userMapper.xml中findUserById完成根据用户id(user_id)用户信息的查询，如果findUserById不在本mapper中需要前边加namespace
+        column：订单信息中关联用户信息查询的列，是user_id
+        关联查询的sql理解为：
+        SELECT orders.*,
+        (SELECT username FROM USER WHERE orders.user_id = user.id)username,
+        (SELECT sex FROM USER WHERE orders.user_id = user.id)sex
+         FROM orders
+         -->
+        <!--<association property="user"  javaType="com.lyh.dto.User"-->
+        <!--select="com.lyh.dao.Mapper.findUserById"-->
+        <!--column="user_id">-->
+        <!--&lt;!&ndash; 实现对用户信息进行延迟加载 &ndash;&gt;-->
+
+        <!--</association>-->
+
+    </resultMap>
+    <!--<resultMap type="com.lyh.dto.Orders" id="OrdersUserResultMap">-->
+    <!--&lt;!&ndash; 配置映射的订单信息 &ndash;&gt;-->
+    <!--&lt;!&ndash; id：指定查询列中的唯一标识，订单信息的中的唯 一标识，如果有多个列组成唯一标识，配置多个id-->
+    <!--column：订单信息的唯一标识列-->
+    <!--property：订单信息的唯一标识列所映射到Orders中哪个属性-->
+    <!--&ndash;&gt;-->
+    <!--<id column="id" property="id"/>-->
+    <!--<result column="user_id" property="userId"/>-->
+    <!--<result column="number" property="number"/>-->
+    <!--<result column="createtime" property="createtime"/>-->
+    <!--<result column="note" property="note"/>-->
+
+    <!--&lt;!&ndash; 配置映射的关联的用户信息 &ndash;&gt;-->
+    <!--&lt;!&ndash; association：用于映射关联查询单个对象的信息-->
+    <!--property：要将关联查询的用户信息映射到Orders中哪个属性-->
+    <!--&ndash;&gt;-->
+    <!--<association property="user" javaType="com.lyh.dto.User">-->
+    <!--&lt;!&ndash; id：关联查询用户的唯 一标识-->
+    <!--column：指定唯 一标识用户信息的列-->
+    <!--javaType：映射到user的哪个属性-->
+    <!--&ndash;&gt;-->
+    <!--<id column="user_id" property="id"/>-->
+    <!--<result column="username" property="username"/>-->
+    <!--<result column="sex" property="sex"/>-->
+    <!--<result column="address" property="address"/>-->
+    <!--</association>-->
+    <!--</resultMap>-->
+    <!--<resultMap type="com.lyh.dto.Orders" id="OrdersAndOrderDetailResultMap" extends="OrdersUserResultMap">-->
+    <!--&lt;!&ndash; 订单信息 &ndash;&gt;-->
+    <!--&lt;!&ndash; 用户信息 &ndash;&gt;-->
+    <!--&lt;!&ndash; 使用extends继承，不用在中配置订单信息和用户信息的映射 &ndash;&gt;-->
+
+
+    <!--&lt;!&ndash; 订单明细信息-->
+    <!--一个订单关联查询出了多条明细，要使用collection进行映射-->
+    <!--collection：对关联查询到多条记录映射到集合对象中-->
+    <!--property：将关联查询到多条记录映射到com.iot.mybatis.po.Orders哪个属性-->
+    <!--ofType：指定映射到list集合属性中pojo的类型-->
+    <!--&ndash;&gt;-->
+    <!--<collection property="orderdetails" ofType="com.lyh.dto.OrderSDetail">-->
+    <!--&lt;!&ndash; id：订单明细唯 一标识-->
+    <!--property:要将订单明细的唯 一标识 映射到com.iot.mybatis.po.Orderdetail的哪个属性-->
+    <!--&ndash;&gt;-->
+    <!--<id column="orderdetail_id" property="id"/>-->
+    <!--<result column="items_id" property="itemsId"/>-->
+    <!--<result column="items_num" property="itemsNum"/>-->
+    <!--<result column="orders_id" property="ordersId"/>-->
+    <!--</collection>-->
+
+    <!--</resultMap>-->
+    <!--将sql语句单独提取出来便于重复利用但是一般都是单表相对应的SQL而且不要把where放在这里-->
+    <sql id="query_user_where">
+        <if test="sex!=null">
+            AND user.sex=${sex}
+        </if>
+
+        <if test="username!=null and username!=''">
+            AND user.username=#{username}
+        </if>
+
+
+    </sql>
+
+    <!-- 查询订单关联查询用户，用户信息需要延迟加载 -->
+    <select id="findOrdersUserLazyLoading" resultMap="OrdersUserLazyLoadingResultMap">
+        SELECT * FROM orders
+    </select>
+
+    <select id="findUserById" parameterType="int" resultType="com.lyh.dto.User">
+        SELECT * FROM  user  WHERE id=#{value}
+    </select>
+
+    <!--<select id="findOrdersUser" resultMap="OrdersUserResultMap">-->
+    <!--SELECT-->
+    <!--orders.*,-->
+    <!--user.username,-->
+    <!--user.sex,-->
+    <!--user.address-->
+    <!--FROM-->
+    <!--orders,-->
+    <!--user-->
+    <!--WHERE orders.user_id = user.id-->
+    <!--</select>-->
+    <!--&lt;!&ndash; 用户信息综合查询-->
+    <!--#{userCustom.sex}:取出pojo包装对象中性别值-->
+    <!--${userCustom.username}：取出pojo包装对象中用户名称-->
+    <!--&ndash;&gt;-->
+    <!--<select id="findUserByName" parameterType="com.lyh.dto.User"-->
+    <!--resultType="com.lyh.dto.User">-->
+    <!--SELECT * FROM user-->
+    <!--&lt;!&ndash;  where 可以自动去掉条件中的第一个and &ndash;&gt;-->
+    <!--<where>-->
+    <!--&lt;!&ndash; 引用sql片段 的id，如果refid指定的id不在本mapper文件中，需要前边加namespace &ndash;&gt;-->
+    <!--<include refid="query_user_where"></include>-->
+    <!--&lt;!&ndash; 在这里还要引用其它的sql片段  &ndash;&gt;-->
+    <!--</where>-->
+    <!--</select>-->
+    <!--&lt;!&ndash; 在映射文件中配置很多sql语句 &ndash;&gt;-->
+    <!--&lt;!&ndash;需求:通过id查询用户表的记录 &ndash;&gt;-->
+    <!--&lt;!&ndash; 通过select执行数据库查询-->
+    <!--id:标识映射文件中的sql，称为statement的id-->
+    <!--将sql语句封装到mappedStatement对象中，所以将id称为statement的id-->
+    <!--parameterType:指定输入参数的类型-->
+    <!--#{}标示一个占位符,-->
+    <!--#{value}其中value表示接收输入参数的名称，如果输入参数是简单类型，那么#{}中的值可以任意。-->
+
+    <!--resultType：指定sql输出结果的映射的java对象类型，select指定resultType表示将单条记录映射成java对象-->
+    <!--&ndash;&gt;-->
+    <!--<select id="findUserById" parameterType="int" resultType="com.lyh.dto.User">-->
+    <!--SELECT * FROM  user  WHERE id=#{value}-->
+    <!--</select>-->
+
+    <!--&lt;!&ndash; 根据用户名称模糊查询用户信息，可能返回多条-->
+    <!--resultType：指定就是单条记录所映射的java对象类型-->
+    <!--${}:表示拼接sql串，将接收到参数的内容不加任何修饰拼接在sql中。-->
+    <!--使用${}拼接sql，引起 sql注入-->
+    <!--${value}：接收输入参数的内容，如果传入类型是简单类型，${}中只能使用value-->
+    <!--&ndash;&gt;-->
+    <!--<select id="findUserByName1" parameterType="java.lang.String" resultType="com.lyh.dto.User">-->
+    <!--SELECT * FROM user WHERE username LIKE '%${value}%'-->
+    <!--</select>-->
+    <!--&lt;!&ndash;<select id="findUserByUserName" parameterType="com.lyh.dto.QueryConditionVo" resultMap="testResultMap">&ndash;&gt;-->
+    <!--&lt;!&ndash;SELECT * FROM user where username=#{userName}&ndash;&gt;-->
+    <!--&lt;!&ndash;</select>&ndash;&gt;-->
+    <!--<select id="findOrdersAndOrderDetailResultMap" resultMap="OrdersAndOrderDetailResultMap">-->
+    <!--SELECT-->
+    <!--orders.*,-->
+    <!--user.username,-->
+    <!--user.sex,-->
+    <!--user.address,-->
+    <!--orderdetail.id orderdetail_id,-->
+    <!--orderdetail.items_id,-->
+    <!--orderdetail.items_num,-->
+    <!--orderdetail.orders_id-->
+    <!--FROM-->
+    <!--orders,-->
+    <!--user,-->
+    <!--orderdetail-->
+    <!--WHERE orders.user_id = user.id AND orderdetail.orders_id=orders.id-->
+
+    <!--</select>-->
+    <!--&lt;!&ndash; 添加用户-->
+    <!--parameterType：指定输入 参数类型是pojo（包括 用户信息）-->
+    <!--#{}中指定pojo的属性名，接收到pojo对象的属性值，mybatis通过OGNL获取对象的属性值-->
+    <!--&ndash;&gt;-->
+    <!--<insert id="insertUser" parameterType="com.lyh.dto.User">-->
+    <!--&lt;!&ndash;-->
+    <!--将插入数据的主键返回，返回到user对象中-->
+
+    <!--SELECT LAST_INSERT_ID()：得到刚insert进去记录的主键值，只适用与自增主键-->
+
+    <!--keyProperty：将查询到主键值设置到parameterType指定的对象的哪个属性-->
+    <!--order：SELECT LAST_INSERT_ID()执行顺序，相对于insert语句来说它的执行顺序-->
+    <!--resultType：指定SELECT LAST_INSERT_ID()的结果类型-->
+    <!--&ndash;&gt;-->
+    <!--<selectKey keyProperty="id" order="AFTER" resultType="java.lang.Integer">-->
+    <!--SELECT LAST_INSERT_ID()-->
+    <!--</selectKey>-->
+    <!--INSERT INTO user (username,birthday,sex,address)values (#{username},#{birthday},#{sex},#{address})-->
+    <!--&lt;!&ndash;-->
+    <!--使用mysql的uuid（）生成主键-->
+    <!--执行过程：-->
+    <!--首先通过uuid()得到主键，将主键设置到user对象的id属性中-->
+    <!--其次在insert执行时，从user对象中取出id属性值-->
+    <!--&ndash;&gt;-->
+    <!--&lt;!&ndash;  <selectKey keyProperty="id" order="BEFORE" resultType="java.lang.String">-->
+    <!--SELECT uuid()-->
+    <!--</selectKey>-->
+    <!--insert into user(id,username,birthday,sex,address) value(#{id},#{username},#{birthday},#{sex},#{address}) &ndash;&gt;-->
+
+    <!--</insert>-->
+
+    <!--&lt;!&ndash; 删除 用户-->
+    <!--根据id删除用户，需要输入 id值-->
+    <!--&ndash;&gt;-->
+    <!--<delete id="deleteUser" parameterType="java.lang.Integer">-->
+    <!--delete from user where id=#{id}-->
+    <!--</delete>-->
+
+    <!--&lt;!&ndash; 根据id更新用户-->
+    <!--分析：-->
+    <!--需要传入用户的id-->
+    <!--需要传入用户的更新信息-->
+    <!--parameterType指定user对象，包括 id和更新信息，注意：id必须存在-->
+    <!--#{id}：从输入 user对象中获取id属性值-->
+    <!--&ndash;&gt;-->
+    <!--<update id="updateUser" parameterType="com.lyh.dto.User">-->
+    <!--update user set username=#{username},birthday=#{birthday},sex=#{sex},address=#{address}-->
+    <!--where id=#{id}-->
+    <!--</update>-->
+
+</mapper>
