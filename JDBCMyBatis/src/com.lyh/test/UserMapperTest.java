@@ -60,20 +60,6 @@ public class UserMapperTest {
 
 
 
-    @Test
-    public void testFindUserListByName() throws Exception {
-        SqlSession sqlSession = sqlSessionFactory.openSession();
-
-        //创建UserMapper代理对象
-        UserMapper userMapper = sqlSession.getMapper(UserMapper.class);
-
-        //调用userMapper的方法
-        User userCustom = new User();
-        // user.setSex();
-        userCustom.setUsername("ggg");
-        List<User> userList = userMapper.findUserByName(userCustom);
-        System.out.println(userList.size());
-    }
 
     @Test
     public void testInsertUser() throws Exception {
