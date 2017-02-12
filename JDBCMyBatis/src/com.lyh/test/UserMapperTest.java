@@ -61,26 +61,26 @@ public class UserMapperTest {
 
 
 
-    @Test
-    public void testInsertUser() throws Exception {
-        //sqlSessionFactory.getConfiguration().addMapper(UserMapper.class);
-
-        SqlSession sqlSession = sqlSessionFactory.openSession();
-
-        //创建UserMapper代理对象
-        UserMapper userMapper = sqlSession.getMapper(UserMapper.class);
-
-        //调用userMapper的方法
-        User user = new User();
-        user.setAddress("huhhu");
-        user.setBirthday(new Date());
-        user.setSex("hsj");
-        user.setUsername("ggg");
-
-        userMapper.insertUser(user);
-
-//下面的操作一定不要忽略不然虽然执行不会不错但是数据库没有插入成功
-        sqlSession.commit();
-        System.out.println(user.getUsername());
-    }
+//    @Test
+//    public void testInsertUser() throws Exception {
+//        //sqlSessionFactory.getConfiguration().addMapper(UserMapper.class);
+//
+//        SqlSession sqlSession = sqlSessionFactory.openSession();
+//
+//        //创建UserMapper代理对象
+//        UserMapper userMapper = sqlSession.getMapper(UserMapper.class);
+//
+//        //调用userMapper的方法
+//        User user = new User();
+//        user.setAddress("huhhu");
+//        user.setBirthday(new Date());
+//        user.setSex("hsj");
+//        user.setUsername("ggg");
+//
+//        userMapper.insertUser(user);
+//
+////下面的操作一定不要忽略不然虽然执行不会不错但是数据库没有插入成功
+//        sqlSession.commit();
+//        System.out.println(user.getUsername());
+//    }
 }
