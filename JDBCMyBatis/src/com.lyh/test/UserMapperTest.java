@@ -58,21 +58,6 @@ public class UserMapperTest {
 
     }
 
-    @Test
-    public void testFindUserByName() throws Exception {
-        SqlSession sqlSession = sqlSessionFactory.openSession();// 创建代理对象
-        Mapper ordersMapperCustom = sqlSession
-                .getMapper(Mapper.class);
-        // 查询订单信息（单表）
-        List<Orders> list = ordersMapperCustom.findOrdersUserLazyLoading();
-
-        // 遍历上边的订单列表
-        for (Orders orders : list) {
-            // 执行getUser()去查询用户信息，这里实现按需加载
-            User user = orders.getUser();
-            System.out.println(user);
-        }
-    }
 
 
     @Test
